@@ -1,5 +1,8 @@
 # CsvConverter
 
+To run a test convert execute `mix scrape_and_export engram-input.csv`
+this will output to the output folder.
+
 To start your Phoenix server:
 
   * Run `mix setup` to install and setup dependencies
