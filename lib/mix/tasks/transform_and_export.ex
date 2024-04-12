@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.ScrapeAndExport do
+defmodule Mix.Tasks.TransformAndExport do
   use Mix.Task
 
   @shortdoc "Scrapes text from Amazon book pages listed in a CSV file and exports each to a separate CSV file."
