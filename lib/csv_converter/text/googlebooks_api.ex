@@ -1,8 +1,11 @@
 defmodule CsvConverter.Text.GoogleBooks do
-  def fetch_book_info_by_isbn(isbn) do
+  def fetch_book_info_by_isbn(isbn, debug_mode) do
     base_url = "https://www.googleapis.com/books/v1/volumes"
     query = URI.encode_query(q: "isbn:#{isbn}")
-    IO.inspect(label: "#{base_url}?#{query}")
+    if debug_mode do
+      fullgoogleurl = "#{base_url}?#{query}"
+      IO.inspect(fullgoogleurl, label: "Google API Url")
+    end
     case HTTPoison.get("#{base_url}?#{query}") do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, parse_first_book_info(body)}
@@ -18,15 +21,16 @@ defmodule CsvConverter.Text.GoogleBooks do
   defp parse_first_book_info(body) do
     body
     |> Jason.decode!()
-    |> Map.get("items")  # Get the list of items
-    |> Enum.at(0)  # Safely get the first item from the list
+    |> Map.get("items")
+    |> Enum.at(0)
     |> case do
-      nil -> {:error, "No books found"}
-      item ->
-        description = get_in(item, ["volumeInfo", "description"])
-        title = get_in(item, ["volumeInfo", "title"])
-        categories = get_in(item, ["volumeInfo", "categories"])
-        {:ok, %{title: title, description: description,categories: categories}}
+        nil -> {:error, "No books found"}
+        item ->
+          description = get_in(item, ["volumeInfo", "description"]) || "No description available"
+          title = get_in(item, ["volumeInfo", "title"]) || "Untitled"
+          categories = get_in(item, ["volumeInfo", "categories"]) || ["Uncategorized"]
+
+          {:ok, %{title: title, description: description, categories: categories}}
+      end
     end
-  end
 end

@@ -7,4 +7,8 @@ defmodule CsvConverter.Text.OpenLibraryCover do
   def get_cover_url(isbn) when is_binary(isbn) do
     "https://covers.openlibrary.org/b/isbn/#{isbn}-L.jpg"
   end
+
+  def get_cover_url(nil) do
+    {:error, "No ISBN provided"}
+  end
 end

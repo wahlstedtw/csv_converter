@@ -4,6 +4,8 @@ defmodule CsvConverter.Text.CsvTransformer do
   """
   alias NimbleCSV.RFC4180, as: CSV
 
+
+
   def read_source_csv(file_path, debug) do
     file_path
     |> File.stream!()
@@ -16,31 +18,33 @@ defmodule CsvConverter.Text.CsvTransformer do
   end
 
   def get_img_url(isbn10) do
-    url = CsvConverter.Text.OpenLibraryCover.get_cover_url(isbn10)
-    {:ok, url}
+    case CsvConverter.Text.OpenLibraryCover.get_cover_url(isbn10) do
+      {:error, _reason} = error -> error
+      url -> {:ok, url}
+    end
   end
+
 
   def calculate_cost(cost, discount) do
-    numeric_cost = String.to_float(cost)
+    numeric_cost = case String.contains?(cost, ".") do
+      true -> String.to_float(cost)
+      false -> String.to_float(cost <> ".0")
+    end
     numeric_discount = String.to_float(discount)
     final_cost = Float.round(numeric_cost * (1 - (numeric_discount / 100)),2)
-    IO.inspect(final_cost, label: "final_cost")
+    final_cost
   end
 
-  def transform_row(row, debug) do
+  def transform_row(row, debug_mode) do
+    :timer.sleep(500)
     isbn10 = row["EAN"]
-    # isbn10 = case CsvConverter.Text.ISBNConverter.isbn13_to_isbn10(row["EAN"]) do
-    #   {:ok, isbn10} -> isbn10
-    #   {:error, reason} ->
-    #     IO.puts("ISBN conversion failed: #{reason}")
-    # end
 
     image_url = case get_img_url(isbn10) do
       {:ok, url} -> url
       _ -> "default_image_url"
     end
 
-    categories = case CsvConverter.Text.GoogleBooks.fetch_book_info_by_isbn(isbn10) do
+    categories = case CsvConverter.Text.GoogleBooks.fetch_book_info_by_isbn(isbn10, debug_mode) do
       {:ok, {:ok, %{categories: fetched_categories}}} when fetched_categories != "" ->
         fetched_categories
       {:ok, %{categories: ""}} ->
@@ -50,23 +54,33 @@ defmodule CsvConverter.Text.CsvTransformer do
         IO.puts("Failed to fetch content: #{reason}")
         "default_categories"
     end
-    description = case CsvConverter.Text.GoogleBooks.fetch_book_info_by_isbn(isbn10) do
-      {:ok, {:ok, %{description: fetched_description}}} when fetched_description != "" ->
+    description = case CsvConverter.Text.GoogleBooks.fetch_book_info_by_isbn(isbn10, debug_mode) do
+      {:ok, {:ok, %{description: fetched_description}}} when fetched_description != nil  ->
         fetched_description
-      {:ok, %{description: ""}} ->
+        # IO.puts("Description is: #{fetched_description}")
+      {:ok, %{description: nil}} ->
         IO.puts("No content was extracted.")
         "default_description"
       {:error, reason} ->
         IO.puts("Failed to fetch content: #{reason}")
         "default_description"
     end
-    html_output = CsvConverter.Text.DescriptionFormatter.format(description)
+    if debug_mode do
+      IO.inspect(description, label: "description")
+    end
 
-    IO.inspect(html_output, label: "html_output")
-    IO.inspect(isbn10, label: "isbn10")
+    html_output = CsvConverter.Text.DescriptionFormatter.format(description)
+    IO.inspect(label: "---")
     IO.inspect(row["Title"], label: "title")
-    IO.inspect(row["Quantity Shipped"], label: "Quantity Shipped")
-    IO.inspect(categories, label: "categories")
+    IO.inspect(isbn10, label: "isbn10")
+
+    if debug_mode do
+      IO.inspect(html_output, label: "html_output")
+      IO.inspect(row["Quantity Shipped"], label: "Quantity Shipped")
+      IO.inspect(categories, label: "categories")
+      IO.inspect(image_url, label: "image_url")
+      IO.inspect(calculate_cost(row["Price"], row["Discount"]), label: "final_cost")
+    end
   #     # "Type" => fetch_type(row["EAN"]), # Historical Fiction
   #     # "Tags" => fetch_tags(row["EAN"]),  # Stubbed function to fetch tags
   #     # "Variant Grams" => oz_to_grams(14.22),  # Example weight conversion
@@ -98,123 +112,14 @@ defmodule CsvConverter.Text.CsvTransformer do
     }
   end
 
-  # def transform_row(row, debug) do
-  #   # IO.inspect(row["EAN"], label: "ISBN-10")
-  #   image_url = case CsvConverter.Text.ISBNConverter.isbn13_to_isbn10(row["EAN"]) do
-  #     {:ok, isbn10} ->
-  #         # if debug do
-  #           IO.inspect(isbn10, label: "ISBN-10")
-  #         # end
-  #         case get_img_url(isbn10) do
-  #           {:ok, url} -> url  # This assigns the URL to `image_url`
-  #           # _ -> "default_image_url"  # Handle error or default case
-  #         end
-  #       case CsvConverter.Text.GoogleBooks.fetch_book_info_by_isbn(isbn10) do
-  #         {:ok, {:ok, %{description: new_description}}} when new_description != "" ->
-  #             IO.puts(new_description)
-  #             # if debug do
-  #             #   IO.inspect(new_description, label: "new_description")
-  #             # end
-  #             # if debug do
-  #             #   IO.inspect(title, label: "Title")
-  #             # end
-  #             # if debug do
-  #             #   IO.inspect(image_url, label: "image_url")
-  #             # end
-  #           # export_to_csv(description, title, file_path, image_url, book_id)
-  #         {:ok, %{new_description: ""}} ->
-  #           IO.puts("No content was extracted.")
-  #         {:error, reason} ->
-  #           IO.puts("Failed to fetch content: #{reason}")
-  #       end
-  #     {:error, reason} ->
-  #       IO.puts("ISBN conversion failed: #{reason}")
-  #   end
-
-  #   # {:ok, book_info} = CsvConverter.Text.GoogleBooks.fetch_book_info_by_isbn(isbn)
-  #   IO.inspect(image_url, label: "image_url")
-
-  #   %{
-  #     "Vendor" => "INGRAM",
-  #     "Title" => row["Title"],
-  #     # "Body (HTML)" => updated_description,
-  #     "Discount" => "40",
-  #     "Product Category" => "Media > Books",
-  #     # "Type" => fetch_type(row["EAN"]), # Historical Fiction
-  #     # "Tags" => fetch_tags(row["EAN"]),  # Stubbed function to fetch tags
-  #     "Published" => "TRUE",
-  #     # "Variant Grams" => oz_to_grams(14.22),  # Example weight conversion
-  #     "Variant Inventory Qty" => row["Quantity Shipped"],
-  #     "Variant Price" => row["Price"],
-  #     # "Cost per item" => calculate_cost(row["Price"], 0.40),  # Stubbed function for cost calculation
-  #     "Variant Barcode" => row["EAN"],
-  #     "Variant Weight Unit" => "lb",
-  #     "Status" => "active",
-  #     "image_url" => image_url,
-  #     "Option1 Name" => "Author",
-  #     "Option1 Value" => row["Author"],
-  #     "Option2 Name" => "Binding",
-  #     "Option2 Value" => row["Binding"],
-  #     "Option3 Name" => "Publisher",
-  #     "Option3 Value" => row["Publisher"]
-  #   }
-  # end
-
-  # def write_destination_csv(file_path, rows) do
-  #   headers = Enum.map(rows, &Map.keys/1) |> List.flatten() |> Enum.uniq()
-  #   rows_data = Enum.map(rows, fn row -> headers |> Enum.map(&Map.get(row, &1, "")) end)
-
-  #   # Prepend the headers as the first row
-  #   csv_data = [headers | rows_data] |> Enum.map(&CSV.dump(&1))
-  #   IO.inspect(csv_data, label: "csv_data")
-  #   # csv_data = headers <> rows_data
-
-  #   # Open the file in write mode and dump the CSV data
-  #   File.stream!(file_path, [:write])
-  #   |> Enum.into(Stream.concat(csv_data))
-  #   |> Stream.run()
-  # end
-
-
   def write_destination_csv(file_path, rows) do
     headers = Enum.map(rows, &Map.keys/1) |> List.flatten() |> Enum.uniq()
     rows_data = Enum.map(rows, fn row -> headers |> Enum.map(&Map.get(row, &1, "")) end)
     csv_data = [headers | rows_data]
     # Convert the data to a CSV format
     csv_content = CSV.dump_to_iodata(csv_data)
-
-    # IO.inspect(csv_content, label: "csv_content")
     # Write the CSV content to a file
-    File.write(file_path, csv_content)
-    # file_stream = File.stream!(file_path, [:write])
-    # IO.inspect(csv_data, label: "csv_data")
+    File.write(file_path, csv_content, [:append])
 
-    # File.write(file_path, csv_data, [:append])
-    # file_stream
-    # |> CSV.dump_to_stream([~w(name age), ~w(mary 28)])
-    # |> Stream.run()
   end
-  # defp export_to_csv(description, title, file_path, image_url, book_id) do
-  #   headers_needed = not File.exists?(file_path)
-  #   headers = if headers_needed, do: "Title, Body (HTML),Image Src,Variant Barcode\n", else: ""
-  #   csv_data_row = "#{title},\"#{description}\",#{image_url},#{book_id}\n"
-  #   content_to_write = headers <> csv_data_row
-  #   File.write(file_path, content_to_write, [:append])
-  # end
-  # def write_destination_csv(file_path, rows) do
-  #   headers = Enum.map(rows, &Map.keys/1) |> List.flatten() |> Enum.uniq()
-  #   rows_data = Enum.map(rows, fn row -> headers |> Enum.map(&Map.get(row, &1, "")) end)
-
-  #   # Open the file stream
-  #   file_stream = File.stream!(file_path, [:write])
-  #   IO.inspect(file_stream, label: "file_stream")
-  #   csv_data = Stream.iterate([headers | rows_data], fn x -> x end)
-  #   IO.inspect(csv_data, label: "csv_data")
-
-  #   |> NimbleCSV.RFC4180.dump_to_stream()
-  #   |> Stream.run()
-  # end
-
-  # Enum.map(&transform_row(&1, debug))
-
 end
