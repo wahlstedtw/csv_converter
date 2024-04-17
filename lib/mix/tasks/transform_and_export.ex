@@ -34,12 +34,6 @@ defmodule Mix.Tasks.TransformAndExport do
       IO.inspect(transformed_books, label: "transformed_books")
     end
 
-    # Enum.each(source_books, fn %{"EAN" => book_id} ->
-    #   case CsvConverter.Text.CsvExport.process_and_export(book_id, file_path, debug_mode) do
-    #     :ok -> Mix.shell().info("Successfully exported #{book_id} to #{file_path}")
-    #     {:error, reason} -> Mix.shell().error("Failed to export #{book_id}: #{reason}")
-    #   end
-    # end)
   end
 
   def generate_file_path do
