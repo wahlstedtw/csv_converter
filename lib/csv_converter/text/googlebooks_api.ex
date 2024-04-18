@@ -38,16 +38,16 @@ defmodule CsvConverter.Text.GoogleBooks do
     |> case do
         nil -> {:error, "No books found"}
         item ->
-          description = get_in(item, ["volumeInfo", "description"]) || log_missing_description()
           title = get_in(item, ["volumeInfo", "title"]) || "Untitled"
           categories = get_in(item, ["volumeInfo", "categories"]) || ["Uncategorized"]
+          description = get_in(item, ["volumeInfo", "description"]) || log_missing_description(title)
 
           {:ok, %{title: title, description: description, categories: categories}}
       end
   end
 
-  defp log_missing_description do
-    IO.puts("Logging missing description at #{DateTime.utc_now()}")
+  defp log_missing_description(title) do
+    IO.puts("No description available for #{title}")
     "No description available"
   end
 

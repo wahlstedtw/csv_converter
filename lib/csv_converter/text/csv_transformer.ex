@@ -36,7 +36,7 @@ defmodule CsvConverter.Text.CsvTransformer do
   end
 
   def transform_row(row, debug_mode) do
-    :timer.sleep(500)
+    # :timer.sleep(500)
     isbn10 = row["EAN"]
 
     image_url = case get_img_url(isbn10) do
@@ -58,7 +58,7 @@ defmodule CsvConverter.Text.CsvTransformer do
       {:ok, {:ok, %{description: fetched_description}}} when fetched_description != nil  ->
         fetched_description
         # IO.puts("Description is: #{fetched_description}")
-      {:ok, %{description: nil}} ->
+      {:ok, %{description: "No description available"}} ->
         IO.puts("No content was extracted.")
         "default_description"
       {:error, reason} ->
