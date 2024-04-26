@@ -1,0 +1,33 @@
+<.header>
+  Product <%= @product.id %>
+  <:subtitle>This is a product record from your database.</:subtitle>
+  <:actions>
+    <.link href={~p"/products/#{@product}/edit"}>
+      <.button>Edit product</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Body html"><%= @product.body_html %></:item>
+  <:item title="Cost per item"><%= @product.cost_per_item %></:item>
+  <:item title="Discount"><%= @product.discount %></:item>
+  <:item title="Option1 name"><%= @product.option1_name %></:item>
+  <:item title="Option1 value"><%= @product.option1_value %></:item>
+  <:item title="Option2 name"><%= @product.option2_name %></:item>
+  <:item title="Option2 value"><%= @product.option2_value %></:item>
+  <:item title="Option3 name"><%= @product.option3_name %></:item>
+  <:item title="Option3 value"><%= @product.option3_value %></:item>
+  <:item title="Product category"><%= @product.product_category %></:item>
+  <:item title="Published"><%= @product.published %></:item>
+  <:item title="Status"><%= @product.status %></:item>
+  <:item title="Title"><%= @product.title %></:item>
+  <:item title="Variant barcode"><%= @product.variant_barcode %></:item>
+  <:item title="Variant inventory qty"><%= @product.variant_inventory_qty %></:item>
+  <:item title="Variant price"><%= @product.variant_price %></:item>
+  <:item title="Variant weight unit"><%= @product.variant_weight_unit %></:item>
+  <:item title="Vendor"><%= @product.vendor %></:item>
+  <:item title="Image src"><%= @product.image_src %></:item>
+</.list>
+
+<.back navigate={~p"/products"}>Back to products</.back>

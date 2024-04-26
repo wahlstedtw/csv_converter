@@ -1,0 +1,41 @@
+<.header>
+  Listing Products
+  <:actions>
+    <.link href={~p"/products/new"}>
+      <.button>New Product</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="products" rows={@products} row_click={&JS.navigate(~p"/products/#{&1}")}>
+  <:col :let={product} label="Body html"><%= product.body_html %></:col>
+  <:col :let={product} label="Cost per item"><%= product.cost_per_item %></:col>
+  <:col :let={product} label="Discount"><%= product.discount %></:col>
+  <:col :let={product} label="Option1 name"><%= product.option1_name %></:col>
+  <:col :let={product} label="Option1 value"><%= product.option1_value %></:col>
+  <:col :let={product} label="Option2 name"><%= product.option2_name %></:col>
+  <:col :let={product} label="Option2 value"><%= product.option2_value %></:col>
+  <:col :let={product} label="Option3 name"><%= product.option3_name %></:col>
+  <:col :let={product} label="Option3 value"><%= product.option3_value %></:col>
+  <:col :let={product} label="Product category"><%= product.product_category %></:col>
+  <:col :let={product} label="Published"><%= product.published %></:col>
+  <:col :let={product} label="Status"><%= product.status %></:col>
+  <:col :let={product} label="Title"><%= product.title %></:col>
+  <:col :let={product} label="Variant barcode"><%= product.variant_barcode %></:col>
+  <:col :let={product} label="Variant inventory qty"><%= product.variant_inventory_qty %></:col>
+  <:col :let={product} label="Variant price"><%= product.variant_price %></:col>
+  <:col :let={product} label="Variant weight unit"><%= product.variant_weight_unit %></:col>
+  <:col :let={product} label="Vendor"><%= product.vendor %></:col>
+  <:col :let={product} label="Image src"><%= product.image_src %></:col>
+  <:action :let={product}>
+    <div class="sr-only">
+      <.link navigate={~p"/products/#{product}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/products/#{product}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={product}>
+    <.link href={~p"/products/#{product}"} method="delete" data-confirm="Are you sure?">
+      Delete
+    </.link>
+  </:action>
+</.table>

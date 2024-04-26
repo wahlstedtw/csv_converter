@@ -16,8 +16,8 @@ defmodule CsvConverterWeb.Router do
 
   scope "/", CsvConverterWeb do
     pipe_through :browser
-
     get "/", PageController, :home
+    resources "/products", ProductController
   end
 
   # Other scopes may use custom stacks.

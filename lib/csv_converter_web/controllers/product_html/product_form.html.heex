@@ -1,0 +1,28 @@
+<.simple_form :let={f} for={@changeset} action={@action}>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+  <.input field={f[:body_html]} type="text" label="Body html" />
+  <.input field={f[:cost_per_item]} type="number" label="Cost per item" step="any" />
+  <.input field={f[:discount]} type="number" label="Discount" step="any" />
+  <.input field={f[:option1_name]} type="text" label="Option1 name" />
+  <.input field={f[:option1_value]} type="text" label="Option1 value" />
+  <.input field={f[:option2_name]} type="text" label="Option2 name" />
+  <.input field={f[:option2_value]} type="text" label="Option2 value" />
+  <.input field={f[:option3_name]} type="text" label="Option3 name" />
+  <.input field={f[:option3_value]} type="text" label="Option3 value" />
+  <.input field={f[:product_category]} type="text" label="Product category" />
+  <.input field={f[:published]} type="checkbox" label="Published" />
+  <.input field={f[:status]} type="text" label="Status" />
+  <.input field={f[:title]} type="text" label="Title" />
+  <.input field={f[:variant_barcode]} type="text" label="Variant barcode" />
+  <.input field={f[:variant_inventory_qty]} type="number" label="Variant inventory qty" />
+  <.input field={f[:variant_price]} type="number" label="Variant price" step="any" />
+  <.input field={f[:variant_weight_unit]} type="text" label="Variant weight unit" />
+  <.input field={f[:vendor]} type="text" label="Vendor" />
+  <.input field={f[:image_src]} type="text" label="Image src" />
+  <%= file_input f, :csv_file %>
+  <:actions>
+    <.button>Save Product</.button>
+  </:actions>
+</.simple_form>
