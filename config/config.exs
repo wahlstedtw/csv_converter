@@ -8,7 +8,7 @@
 import Config
 
 config :csv_converter,
-  ecto_repos: [CsvConverter.Repo],
+  # ecto_repos: [CsvConverter.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
