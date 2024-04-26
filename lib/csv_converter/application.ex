@@ -9,7 +9,7 @@ defmodule CsvConverter.Application do
   def start(_type, _args) do
     children = [
       CsvConverterWeb.Telemetry,
-      CsvConverter.Repo,
+      # CsvConverter.Repo,
       {DNSCluster, query: Application.get_env(:csv_converter, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: CsvConverter.PubSub},
       # Start the Finch HTTP client for sending emails
